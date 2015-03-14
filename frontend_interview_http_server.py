@@ -28,6 +28,8 @@ class FrontendInterviewRequestHandler(SimpleHTTPRequestHandler):
         if self.path == '/get_update':
             self.send_response(200)
             self.send_header("Content-type", "application/json")
+            # Access origin set to (*) for CORS
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             
             req_data = {}

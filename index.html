@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>
+			SpringLeaf Assignment
+		</title>
+    <link rel="stylesheet" href="build/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="build/css/style.css" type="text/css">
+    <!-- <link rel="stylesheet" href="build/css/demo-styles.css" /> -->
+    <!-- <link rel="stylesheet" href="build/css/fluid_grid.css" /> -->
+    <link rel="stylesheet" href="build/css/font-awesome.min.css"/>
+
+	</head>
+	<body style="padding-top:4%;">
+    <!-- Navigation Starts -->
+      <nav>  
+        <div id="menu" class="navbar navbar-default navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <a type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </a> 
+            </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="index.html" class="scrolly"> <span class="glyphicon glyphicon-home"></span> SpringLeaf Assignment </a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <!-- Navigation Ends -->
+    <div class="container">
+      <h3 class="blue">SpringLeaf List</h3>
+      <div class="row">
+        <div class="col-md-6">      
+          <input type="text" required class="form-control input-lg" id="txtField" placeholder="Search"/><br/>
+        </div>
+        <div class="col-md-6">
+          <button id="searchBtn" class="btn btn-success btn-lg" onClick="regexSearch()"><i class="fa fa-search"></i> Search </button>
+          <button id="clrBtn" class="btn btn-danger btn-lg" onClick="clearSearch()"><i class="fa fa-remove"></i> Clear </button>
+        </div>
+      </div>
+      <div id="search_error" class="text-danger"><p>Please enter search keyword</p></div>
+      <div class="bg-danger"><p> Error ! Please try again after sometime </p></div>
+
+      <ul id="list_container">
+        
+      </ul>
+    </div>
+    <script type="text/javascript" src="build/js/jquery.min.js"></script>
+    <script type="text/javascript" src="build/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      var onData = function(data) {
+        // Check if data is not null or empty
+        if(data.length === 0){
+          $(".bg-danger").show();
+        }
+        else{
+          $(".bg-danger").hide();
+          var ul = $("#list_container");
+          var class_name = "";
+
+          //only single highlight element
+
+          if(data["selected"] !== 0 && ul.children("li").length > 0){
+            ul.children("li").removeClass("red");
+            class_name = "red";
+          }
+
+          //update repeated item_id
+
+          if($("#" + data['item_id']).length > 0){
+            $("#" + data['item-id']).html(data['item_id'] + " - " + data['display']).addClass(class_name);
+          }
+          else{  
+            ul.append("<li class='" + class_name + "'id='" + data['item_id'] + "'>" + data['item_id'] + " - " + data['display'] + "</li>");
+          }
+          var li = ul.children("li");
+          li.sort(function(a,b){
+            var an = parseInt(a.getAttribute('id')),
+                bn = parseInt(b.getAttribute('id'));
+
+            if(an > bn) {
+              return 1;
+            }
+            else if(an < bn) {
+              return -1;
+            }
+            else return 0;
+          });
+          li.detach().appendTo(ul);
+        }
+        
+      };
+      var onErr = function() {
+
+        //show error-div on ajax error 
+
+        $(".bg-danger").show();
+      };
+      function listUpdater() {
+        $.ajax({
+          url : '/get_update',
+          success : onData,
+          error : onErr
+        });
+      }
+      function regexSearch(){
+        var searchTerm = $("#txtField").val();
+        if(searchTerm === "" || typeof searchTerm === null || typeof searchTerm === undefined){
+          $("#search_error").show();
+        }
+        else{
+          $("#search_error").hide();
+          $("#clrBtn").show();
+          // $("#searchBtn").hide();
+          $("li").each(function(k,v){
+            var regex = new RegExp(searchTerm, "ig");
+            if($(this).text().match(regex)){
+              $(this).show();
+            }
+            else{
+              $(this).hide();
+            }
+          });
+        }
+      }
+      function clearSearch(){
+        $("#clrBtn").hide();
+        $("#searchBtn").show();
+        $("#txtField").val("");
+        $("li").show();
+      }
+      jQuery(document).ready(function(){
+        $(".bg-danger").hide();
+        $("#search_error").hide();
+        $("#clrBtn").hide();
+        //ajax fn call every 1 sec
+        setInterval(function () {listUpdater()}, 1000);
+      });
+    </script>
+  </body>
+</html>  
+    
